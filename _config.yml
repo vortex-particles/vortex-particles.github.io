@@ -1,8 +1,8 @@
 remote_theme: just-the-docs/just-the-docs
-title: ASOHF Documentation
-description: Adaptive Spherical Overdensity Halo Finder (Planelles & Quilis 2010, Vallés-Pérez, Planelles & Quilis 2022 in prep.)
+title: vortex-p Documentation
+description: vortex-p (Vallés-Pérez, Planelles & Quilis, 2021a,b; Vallés-Pérez et al., in prep.). Multi-resolution Helmholtz and Reynolds decomposition of particle-based data.
 aux_links:
-  "ASOHF on GitHub":
-    - "//github.com/dvallesp/ASOHF"
+  "vortex-p on GitHub":
+    - "//github.com/dvallesp/vortex-p"
 last_edit_timestamp: true # show or hide edit time - page must have `last_modified_date` defined in the frontmatter
 last_edit_time_format: "%b %e %Y at %I:%M %p" # uses ruby's time format: https://ruby-doc.org/stdlib-2.7.0/libdoc/time/rdoc/Time.html
