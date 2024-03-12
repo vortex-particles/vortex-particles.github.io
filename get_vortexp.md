@@ -56,7 +56,7 @@ INTEGER NPALEV,NLEVELS
 PARAMETER (NPALEV=10000,NLEVELS=4) 
 ```
 - `NPALEV` is the maximum number of AMR patches. This quantity may vary significant depending on your specific user case, so it is advisable to run the code with a large value (e.g. `NPALEV=10000`). If it is too small (i.e., when running the code, the maximum number of patches is reached), the code will stop with an error message. If it is too generous, you can consider lowering it to save memory.
-- `NLEVELS` is the maximum number of refinement levels. Take into account that your best resolution to identify density peaks will be <img src="https://render.githubusercontent.com/render/math?math=L/(N_x \cdot 2^\mathrm{NLEVELS})">, with <img src="https://render.githubusercontent.com/render/math?math=L, \, N_x"> the domain length and the number of grid cells. A typical suggestion is to set `NLEVELS` to match the force resolution of the simulation, since you are not expected to form structures below this scale.
+- `NLEVELS` is the maximum number of refinement levels. Take into account that your best resolution to identify density peaks will be <img src="https://render.githubusercontent.com/render/math?math=L/(N_x \cdot 2^\mathrm{NLEVELS})">, with <img src="https://render.githubusercontent.com/render/math?math=L, \, N_x"> the domain length and the number of grid cells. A typical suggestion is to set `NLEVELS` to match the force resolution of the simulation, since you are not expected to form structures below this scale. $a + b$
 
 ```fortran 
 ! Maximum patch extension 
