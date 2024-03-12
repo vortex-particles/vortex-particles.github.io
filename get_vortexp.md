@@ -56,7 +56,7 @@ INTEGER NPALEV,NLEVELS
 PARAMETER (NPALEV=10000,NLEVELS=4) 
 ```
 - `NPALEV` is the maximum number of AMR patches. This quantity may vary significant depending on your specific user case, so it is advisable to run the code with a large value (e.g. `NPALEV=10000`). If it is too small (i.e., when running the code, the maximum number of patches is reached), the code will stop with an error message. If it is too generous, you can consider lowering it to save memory.
-- `NLEVELS` is the maximum number of refinement levels. Take into account that your best resolution to identify density peaks will be <img src="https://render.githubusercontent.com/render/math?math=L/(N_x \cdot 2^\mathrm{NLEVELS})">, with <img src="https://render.githubusercontent.com/render/math?math=L, \, N_x"> the domain length and the number of grid cells. A typical suggestion is to set `NLEVELS` to match the force resolution of the simulation, since you are not expected to form structures below this scale. $a + b$
+- `NLEVELS` is the maximum number of refinement levels. Take into account that your best resolution to identify density peaks will be $L/(N_x \cdot 2^\mathrm{NLEVELS})$, with $L, \, N_x$ the domain length and the number of base grid cells. A typical suggestion is to set `NLEVELS` to match the force resolution of the simulation, since you are not expected to form structures below this scale. $a + b$
 
 ```fortran 
 ! Maximum patch extension 
@@ -66,41 +66,111 @@ PARAMETER (NAMRX=32,NAMRY=32,NAMRZ=32)
 - `NAMRX`, `NAMRY` and `NAMRZ` are the maximum extension of the AMR patches. The smaller the value, the more modular the AMR structure will be, which could involve less memory usage. 32 or 64 are typically reasonable values.
 
 
+### Required libraries
+
+#### coretran 
+
+The kd-tree space-partitioning algorithm used in vortex-p is provided by the [`coretran` library](https://github.com/leonfoks/coretran), which contains many well-optimised routines for intensive numerical computation.
+
+While `coretran` is well documented, for the sake of completeness, here we summarise the steps to install it locally:
+
+1. First, move to the folder you want to install `coretran` in (in our example, it will be the home directory), and clone the repository:
+
+```bash
+cd ~
+git clone https://github.com/leonfoks/coretran
+cd coretran
+```
+
+2. Create a `build` directory, where the library will be compiled, and a `library` directory, where we will install the library. Enter the `build` directory:
+
+```bash
+mkdir build
+mkdir library
+cd build
+```
+
+3. Generate the Makefile with `cmake`:
+
+```bash
+cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/home/your_user/coretran/library ../src
+```
+
+When doing so, make sure that cmake detects the Fortran compiler you want to use. If it does not, you can specify it with the `-DCMAKE_Fortran_COMPILER` flag. If you are using a cluster, in general you just need to unload all compilers and load the one you want to use, and then cmake will detect it. In our tests, we have used gfortran-11. We recommend you to do the same to avoid any potential issues with untested configurations.
+
+4. Compile and install: 
+
+```bash
+make 
+make install
+```
+
+Now, the library is installed in your `~/coretran/library` folder, which contains the relevant library and include files. In the `~/coretran/bin/` folder you will find two executables to test your installation.
+
+#### FFTW
+
+vortex-p can, optionally, make use of FFTW for fast, parallel computation of the Fourier transforms required for the Helmholtz-Hodge decomposition. FFTW is fairly easy to install with your preferred package manager, and is as a matter of fact installed in most computing clusters (at least, in those abundantly used by astrophysicists!). You can get more information from [the FFTW website](http://www.fftw.org/download.html). In our tests, we have used FFTW 3.3.8.
 
 ### Compilation
 
-ASOHF can be compiled either with the GNU (`gfortran`) or with the Intel (`ifort`) Fortran Compilers. The following compilation options work well for us using gfortran-11 and ifort 2018 on several machines:
+#### Setting the Makefile
 
-#### GNU:
-```bash
-gfortran -O3 -march=native -fopenmp -mcmodel=medium -funroll-all-loops -fprefetch-loop-arrays -mieee-fp -ftree-vectorize particles.f asohf.f -o asohf.x
+You can now compile the code by using the provided Makefile. This Makefile provides some examples with different paths and configuration in the system. If you have compiled `coretran` as described [above](#coretran), you may use the option `COMP=3`.
+
+Note that:
+
+- If you have installed `coretran` in a different place/way, you will need to modify the `Makefile` accordingly. In particular, these two lines:
+
+```Makefile
+ LIBS=-Wl,-rpath,$(HOME)/coretran/lib $(HOME)/coretran/lib/libcoretran.so
+ INC=-I$(HOME)/coretran/library/include/coretran/
+ ```
+ - If you want to use FFTW, you need to link it properly, 
+```Makefile
+ ifeq ($(FFTW),1)
+  LIBS +=-L/usr/local/lib64 -lfftw3f_omp -lfftw3f
+ endif
+ ```
+
+#### Compiling options
+
+The Makefile provides several options to compile the code. You can obtain help by running:
+
+```bash 
+make info
 ```
 
-#### Intel:
-```bash
-ifort -O3 -mcmodel=medium -qopenmp -shared-intel -fp-model consistent -ipo -xHost particles.f asohf.f -o asohf.x
-```
+The only mandatory option is:
 
-#### macOS and the stack size:
-macOS system have a limitation of the maximum stack size that can be granted to a process, regardless of what the user specifies with the `OMP_STACKSIZE` environment variable or the `ulimit` command. ASOHF makes use of the stack, rather than the heap, by passing several large arrays as parameters to subroutines rather than using `COMMON` blocks, since it provides faster access. However, this may cause instantaneous failure of the code with Apple systems running macOS.
+- `COMP`: the compilation options. If you have followed the steps here, you can use `COMP=3`.
 
-To circumvent this, please use the `-Wl,-stack_size,0x80000000` flag in your compilation command to set the stack size to 2GB, which should be enough even for large simulations. 
+Several important optional options (which are not mandatory; check the default values with `make info`) are:
+
+- `FFTW`: if you want to use FFTW, set `FFTW=1`; else`FFTW=0`.
+- `FILTER`: if you want to use the multi-scale filter, set `FILTER=1`; else `FILTER=0`.
+- `WEIGHT`: the weighting scheme: particle-number-weighted (0), mass-weighted (1), or volume-weighted (2).
+- `KERNEL`: the kernel family (0: cubic spline; 1: Wendland C4; 2: Wendland C6).
+- `OUTPUT_GRID`: if you want to output any gridded results and/or inputs, set `OUTPUT_GRID=1`; else `OUTPUT_GRID=0`.
+- `OUTPUT_PARTICLES`: if you want to output any particle results, set `OUTPUT_PARTICLES=1`; else `OUTPUT_PARTICLES=0`.
+- `OUTPUT_FILTER`: if you want to output any information about the filter (turbulent total velocities prior to the HHD, filtering lengths, etc.), set `OUTPUT_FILTER=1`; else `OUTPUT_FILTER=0`.
+
+The behaviour of vortex-p with respect to the outputs and the filtering scheme can be further tuned at runtime by modifying the `vortex.dat` file. See [the parameters file page](set_parameters.md) for more information. Therefore, if you have compiled the code with `FILTER=1`, you can still choose to not use the filter at runtime (but not the other way around). The same applies to the `OUTPUT_GRID`, `OUTPUT_PARTICLES` and `OUTPUT_FILTER` options. This is mainly done to generate a more efficient executable.
 
 ### Running
 
-For running ASOHF, you may want to use a shell script containing all the necessary environment variables. An example is served below:
+For running vortex-p, you may want to use a shell script containing all the necessary environment variables. An example is served below:
 
 ```bash
 >> cat run.sh
 #!/bin/bash
 
-export OMP_NUM_THREADS=24 # number of threads
-export OMP_STACKSIZE=3000m # size of the stack
-export OMP_PROC_BIND=true # avoid switching threads
-export OMP_WAIT_POLICY=active
-export KMP_BLOCKTIME=1000000 #very large number
+ulimit -s 128000000
+ulimit -v 500000000
+ulimit -c 0
+export OMP_NUM_THREADS=24
+export OMP_STACKSIZE=4000m
+export OMP_PROC_BIND=true
 
-ulimit -c 0 # avoid core dumps
-
-./asohf.x > asohf.out
+# Run the code. You may use unbuffer to get instant output logs in the vortex.out file.
+./vortex > vortex.out  &
 ```
