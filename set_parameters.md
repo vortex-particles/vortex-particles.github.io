@@ -2,244 +2,153 @@
 layout: default
 title: Setting the parameters
 nav_order: 4
-last_modified_at: 2022-04-06T13:37:11
+last_modified_at: 2024-03-13T09:23:11
 ---
 
-## Setting the parameters of ASOHF
+## Setting the parameters of vortex-p
 
-In this section, we describe the run-time parameters of ASOHF, which are set in the `./input_files/asohf.dat` file. These can be changed after [compilation of the code](get_ASOHF#compilation).
+In this section, we describe the run-time parameters of vortex-p, which are set in the `vortex.dat` file. These can be changed after [compilation of the code](get_vortexp#compilation).
+
+> It is worth reminding here that, except for the possible parameters to flag strong shocks (only used if the multiscale filter is applied and no Mach number information is given), there are no dimensional parameters in vortex-p. This also means that the decompositions are unit-system-independent, and there is no need to perform unit conversions in IO.
 
 ### General parameters block
 
 These parameters refer to the general behaviour of the code.
 
 ```
-Files: first, last, every -------------------------------------------->
-0,0,50
+Files: first, last, every, num files per snapshot -------------------->
+144,144,1,2
 ```
-- Iterations to analyse. It is assumed that the outputs have been saved each `every` iteration. If instead, outputs have been saved at a pace that does not correspond to constant interval of iterations, it is straightforward to change the main loop of the code (look in the `asohf.f` file for the `DO IFI2=1, NFILE2` line). 
+- Simulation snapshots to analyse. `vortex-p` will be executed for snapshot `first` to `last`, every `every` snapshots. Additionally, the GADGET-unformatted reader supports that the snapshot files are split in a number of `snapXXX.0`, `snapXXX.1`, etc. files. In this case, the last parameter specifies the number of files per snapshot.
+If snapshots are numbered differently, it is straightforward to change the main loop of the code (look in the `vortex.f` file for the `DO IFI=1, NFILE` line). 
 
 ```
 Cells per direction (NX,NY,NZ) --------------------------------------->
 128,128,128
 ```
-- Number of grid cells in each direction. These grid sizes should be smaller or equal than the [compilation parameters `NMAX`, `NMAY` and `NMAZ`](get_ASOHF#compilation-time-parameters).
-
-
-```
-Hubble constant (h), omega matter, fraction of DM to total mass ------>
-0.678,0.31,0.845
-```
-- The Hubble dimensionless constant (<img src="https://render.githubusercontent.com/render/math?math=h\equiv H_0/(100\,\mathrm{km}\,\mathrm{s}^{-1}\,\mathrm{Mpc}^{-1})">), the matter density parameter (<img src="https://render.githubusercontent.com/render/math?math=\Omega_m=\rho_B(z=0)/\rho_\mathrm{crit}(z=0)">) and the fraction of DM to total mass (<img src="https://render.githubusercontent.com/render/math?math=f_\mathrm{DM}\equiv 1 - \Omega_b / \Omega_m">).
+- Number of base grid cells in each direction. These grid sizes should be smaller or equal than the [compilation parameters `NMAX`, `NMAY` and `NMAZ`](get_vortexp#compilation-time-parameters). As a rule of thumb, choose $N_x \sim \sqrt[3]{N_\mathrm{part}}$.
 
 ```
 Max box sidelength (in input length units) --------------------------->
-40.0
+50.e3
 ```
-- The largest of the box side lengths, in the input length units.
-
-```
-Reading flags: IS_MASCLET (=0, no; =1, yes), GENERIC_READER (see docs) ----->
-0,0
-```
-- Generally, set the first parameter to 0. As for the second:
-  - `GENERIC_READER=0` for the generic `particlesXXXXX` files described in the [input data page](input_data).
-  - `GENERIC_READER=1` for the GADGET-2 unformatted files reader.
->#### MASCLET users
->- If reading data from MASCLET, set the first parameter to 1
-
-```
-Output flags: grid_asohf,density,haloes_grids,subs_grids,subs_part --->
-0,0,0,0,0
-```
-- Output intermediate files for debugging purposes (=0, no; =1, yes):
-    - ASOHF grid file 
-    - ASOHF density interpolation 
-    - List of haloes pre-identified within the grid
-    - List of subhaloes pre-identified within the grid 
-    - List of substructures identified using particles
-
-```
-Input units: MASS (Msun; <0 for Msun/h), LENGTH (cMpc; <0 for cMpc/h),
- SPEED (km/s), ALPHA (v_input = a^alpha dx/dt; 1 is peculiar vel.) --->
-9.1717e18,1.0,299792.458,1.0
-```
-- Units of the input data:
-    - Input unit of mass in solar masses; if negative, the input mass is assumed to be given in Msun/h.
-    - Input unit of length in comoving Mpc; if negative, the input length is assumed to be given in cMpc/h.
-    - Input unit of speed in km/s.
-    - Since different codes use different velocity variables, specify the exponent <img src="https://render.githubusercontent.com/render/math?math=\alpha"> such that <img src="https://render.githubusercontent.com/render/math?math=\mathbf{v}_\mathrm{input} = a(t)^\alpha \frac{\mathrm{d}\mathbf{x}}{\mathrm{d}t}">, with a(t) the scale factor of the given cosmology and x the comoving position. For example, with <img src="https://render.githubusercontent.com/render/math?math=\alpha=1">, the input velocity is the usual peculiar velocity.
->#### MASCLET users:
->This line can be ignored, as the reader will automatically take care of MASCLET units.
-
-```
-Input domain (in input length units; x1,x2,y1,y2,z1,z2) -------------->
--20.0,20.0,-20.0,20.0,-20.0,20.0
-```
-- Specify the input domain of the simulation, with the x, y and z left and right corners of the domain.
-
-### Domain decompose block
-This parameters are used to decompose the input domain into subdomains, or to restrict the finding process to a specific reason. If you do not want to use the feature, set the first parameter to 0 and do not worry about the second line.
-
-```
-Keep only particles inside a given domain (=0, no; =1, yes) ---------->
-0
-```
-- Set this parameter to 1 if you want to analyse only particles inside a given subdomain.
+- The largest of the box side lengths, $L$ in the input length units. The base grid resolution will then be $L/N_x$.
 
 ```
 Domain to keep particles (in input length units; x1,x2,y1,y2,z1,z2) -->
-0.,0.,0.,0.,0.,0.
+-19972.0312, 30027.9688, -27619.4688, 22380.5312, -24089.4375, 25910.5625
 ```
-- If the above parameter is set to 1, specify the volume where you want to keep the particles. Use the same units for positions as for the input domain.
+- Only particles inside this region will be considered. Note that $\max(x_2- x_1, y_2-y_1, z_2-z_1) \leq L$. Ideally, choose the domain to be considerably larger than your object of interest. For instance, if you are analysing a (re)simulation of a galaxy cluster, choose a box at least 3 or 4 times the extent of the cluster.
+
+
+### Output customisation block
+These parameters can be used to customise the outputs of vortex-p. For each entry below, the user can choose to output that quantity (1) or not (0).
+
+```
+Gridded data: kernel length, density (mutually exclusive), velocity -->
+0,1,1
+```
+- This block refers to the input quantities assigned to the AMR grid. The first one is the length around each cell centre considered to assign the velocity field. The second one is the density field, computed with the same grid-assignment scheme as the velocity field. The third one is the velocity field itself. Note that the first and second outputs are mutually exclusive: only one of them can be set to 1.
+
+```
+Gridded results: vcomp, vsol, scalar_pot, vector_pot, div(v), curl(v)->
+1,1,1,1,1,1
+```
+- This block refers to the output quantities on the AMR grid. In order, we have the compressive velocity, the solenoidal velocity, the scalar potential of the compressive velocity, the vector potential of the solenoidal velocity, the divergence of the velocity field, and the curl of the velocity field.
+
+> Note: when running vortex-p with the turbulent filter, these results correspond to the turbulent velocity field.
+
+```
+Particle results: interpolation error, particle-wise results --------->
+1,1
+```
+- This block contains the output quantities reinterpolated back to particles. The first one refers to an estimation of the error in the interpolation of the velocity field, defined here as a measure of the difference between the individual particle velocity and the smoothed velocity at its location. The second one refers to the particle-wise results, which contain the same information as the gridded results (total, compressive and solenoidal smoothed velocity), but reinterpolated back to the particles.
+
+```
+Filter: gridded Mach/ABVC, shocked cells, filtering length, vturb ---->
+1,1,1,1
+```
+- This block contains the output quantities related to the multiscale filter. The first one refers to the gridded Mach number (or the artificial bulk viscosity constant, if the Mach number is not available and that option is chosen below). The second one refers to the cells flagged as shocked. The third one refers to the filtering length, which is the length scale used to split bulk and turbulent contributions at each location. The fourth one refers to the turbulent velocity itself.
 
 ### Mesh creation parameters block
-These parameters control the mesh creation process, which is crucial for the identification of density peaks.
+These parameters control the mesh creation process, which is crucial for recovering a faithful representation of the velocity field with enough dynamical range.
 
 ```
-Levels for the mesh (stand-alone) ------------------------------------>
-4
+Number of levels ----------------------------------------------------->
+9
 ```
-- Maximum number of refinement levels to create. Take into account that your best resolution will be <img src="https://render.githubusercontent.com/render/math?math=L/(N_x \cdot 2^\mathrm{NLEVELS})">, with <img src="https://render.githubusercontent.com/render/math?math=L, \, N_x"> the domain length and the number of grid cells. A typical suggestion is to set it to the force resolution of the simulation, since you are not expected to form structures below this scale. If you are not interested in smaller scales, you could use less levels; but it is nevertheless recommended to use a sufficient number of levels for being able to recenter the density peaks properly.
+- Maximum number of refinement levels to create. Take into account that your best resolution will be $L/(N_x \cdot 2^\mathrm{NLEVELS})$, with $L, \, N_x$ the domain length and the number of base grid cells per direction. A typical suggestion is to set it to the best resolution (smallest kernel length), since below this resolution the dynamics are not resolved.
 
 ```
-PARCHLIM(=0 no limit patches/level,>0 limit) ------------------------->
-0
-Max num of patches per level(needs PARCHLIM>0) ----------------------->
-1000
+Number of particles for a cell to be refinable ----------------------->
+8
 ```
-- Use this parameter to limit the number of patches per level. If you do not want to use this feature, set the first parameter to 0. If you want to limit them, set it to 1, and write the maximum number of patches per level in the second line (one integer per level, comma-separated).
+- A cell will be flagged as refinable if it hosts more (or equal) particles than this threshold. This parameter is crucial to control the number of patches (and, thus, to keep memory usage and CPU time contained). If you think that the code is creating too many patches, you may want to increase this parameter. If you think that the code is underresolving important regions, you may want to decrease it.
 
 ```
-Refinement threshold (num. part.), refinable fraction to extend ------>
-3,0.05
+Minimum size of a refinement patch to be accepted -------------------->
+6
 ```
-- Cells hosting more (or equal) particles than the refinement threshold will be flagged as refinable. You can lower this parameter (up to around 3) to refine more regions, while you can increase it to refine less regions (and therefore reduce computational cost, at the expense of losing small-scale structures). Reasonable values are in the rangle 3-8.
-- A patch fill be extended one cell along a given face if the fraction of refinable cells among the cells to be added exceeds this threshold. If you want to accept any extension of a patch with, at least, 1 refinable cell, set this parameter to an arbitrarily small positive value (e.g., 1.e-4).
+- Not all refinable cells get finally refined, but only if they are going to be covered by a patch whose minimum extent (measured in number of fine, i.e. refined, cells) is at least this number. The lower the value, the more aggressive the refinement. However, it will importantly increase the computational cost. A reasonable value is around 6-8, although in test runs it may be advisable to start with a larger number (i.e., 20) to decrease the computing time.
 
 ```
-Minimum patch size (child cells) ------------------------------------->
-14
-```
-- A patch has to reach this number of (fine) cells along each dimension in order to be accepted; otherwise the region does not get refined. This parameter is used to avoid the creation of very small patches, which are not expected to be useful for the identification of density peaks and increase drastically the computational cost. Set it to a value larger or equal to 14, and lower than the maximum patch size (`NAMRX`, `NAMRY`, `NAMRZ`). This parameter is crucial to control the number of patches (and, thus, to keep memory usage contained). If you think that the code is creating too many patches, you may want to increase this parameter.
-
-```
-Base grid refinement border, AMR grids refinement border ------------->
-4,0
-```
-- Do not flag as refinable the first parameter number of cells close to the domain border. This parameter is used to avoid problems with the boundary conditions. 
-- Likewise, the second parameter is the number of cells close to each AMR patch boundary to exclude from further refinement. It can be safely set to 0 if you accept that a patch can share a face, edge or corner with its father (which is not problematic).
-
-```
-Allow for additional overlap (to avoid losing signal) in the mesh ---->
-0
-```
-- If this parameter is set to 1, the cells in the boundary of a patch will not be considered refined, so as to try to place another patch covering them so that they are in a more central position. Generally it is not required, but it may rarely happen that some small halo is lost due to its density peak being too close to the boundary of the patch. 
-
-```
-Density interpolation kernel (1=linear, 2=quadratic) ----------------->
+Cells not to be refined from the border (base grid) ------------------>
 2
 ```
-- Order of the kernel used to interpolate each particle into the density field: 1 for a trilinear kernel; 2 for a tri-quadratic kernel.
+- So as to not interfere with the boundary conditions, AMR patches are not allowed to cover this number of cells from any face of the base grid. This may be set to a larger value if one wants to refine only in a more central region of the domain.
+
+### Velocity interpolation parameters block
+This block contains the parameters referring to the grid-assignment of the velocity field. Note that there is only one parameter here. The other relevant parameter, i.e. the kernel function, is [set in compilation time](get_vortexp#compilation-time-parameters).
 
 ```
-Variable for mesh halo finding: 1(dm), 2(dm+stars) ------------------->
+Number of neighbours for interpolation ------------------------------->
+58
+```
+- The number of neighbours to consider, around each cell centre, for the interpolation of the velocity field. This number should be large enough to ensure that the kernel function is well sampled, but not too large to avoid excessive computational cost.
+
+> Note: in an SPH simulation, a reasonable rule of thumb is to set the kernel function and the number of neighbours to be the same as used when evolving the simulation, since this is the most physically-motivated definition of the underlying velocity field.
+
+### Poisson solver block 
+
+These parameters control the Poisson solver, which is used to compute the potential fields.
+
+```
+SOR presion parameter, SOR max iter, border for AMR patches ---------->
+1e-9,1000,2
+``` 
+
+- The first parameter is the precision parameter for the SOR solver. The SOR iterations in the AMR patches are stopped when the relative variation falls below this value. The second one is the maximum number of iterations, to prevent the SOR solver to get stuck in some rare situations. The third one is the number of ghost cells along each direction, used to enforce the boudnary conditions away from the region of interest of each patch.
+
+### Multifiltering
+These parameters control the multifiltering process, which is used to adaptively extract the turbulent contribution to the velocity field.
+
+```
+Multiscale filter: apply filter -------------------------------------->
 1
 ```
-- This parameter is used to specify the variable to use for the halo finding. If you want to use only DM, set it to 1. If you want to use also stars, set it to 2.
+- Keep in mind that running the filter requires the `FILTER=1` flag in the [compilation process](get_vortexp#compilation). If, after compiling, you do not want to use the filter, you can set this parameter to 0 without the need of recompiling the code. 
 
 ```
-Kernel level for stars (if VAR=2) ------------------------------------>
-5
+Filtering parameters: tolerance, growing step, max. num. of its. ----->
+0.1,1.05,200
 ```
-- If `VAR=2`, the following parameter can be used to specify the kernel level of stars. That is, stars will be interpolated onto the density field using a kernel with size <img src="https://render.githubusercontent.com/render/math?math=L/(N_x \cdot 2^{\ell_\mathrm{stars}})">.
+- The filtering length is increased until the relative variation of the turbulent velocity fields falls below the tolerance set by the first parameter. Each iteration of the filter algorithm increases the filtering length by the factor set by the second parameter. The third parameter is the maximum number of iterations allowed, to avoid pathologic cases where the filter does not converge.
+
+### On-the-fly shock detection (for multifiltering)
+The last block of parameters refers to the flagging of strong shocks, which is used as an additional stopping condition for the iterations of the multiscale filter. This is only used if the multiscale filter is applied.
+
+The first two parameters are used in case no Mach number information is available. The third one is used to flag strong shocks if the Mach number is available.
 
 ```
-Particle especies (0=there are different mass particles, 1=equal mass
- particles, use local density, 2=equal mass particles, do nothing) --->
-1
+Threshold on velocity divergence (negative, input units) ------------->
+-1.25
+Threshold on artificial bulk viscosity constant ---------------------->
+1.
 ```
-- How to set the kernel size for each particle:
-    - If 0, ASOHF assumes DM particles have different masses, and each particle will get a cloud representing its original size back in the initial conditions.
-    - If 1, ASOHF computes the kernel size from a pre-estimation of the density field on the base grid. Particles in a cell with density <img src="https://render.githubusercontent.com/render/math?math=\rho"> will get a cloud equivalent to the refinement level <img src="https://render.githubusercontent.com/render/math?math=\lfloor \log_8 (\rho/\rho_B) \rfloor)"> (bounded by 0 and `N_ESP`-1).
-    - If 2, ASOHF assumes that all particles have the same mass, and therefore the kernel size is the same for all of them.
-
-### Halo finding parameters block
-These parameters control the halo finding process.
+- Without Mach number information, strong shocked cells are flagged as those with artificial viscosity above a certain threshold, $\alpha > \alpha^\mathrm{thr}$, and strong compression, $\nabla \cdot \mathbf{v} < (\nabla \cdot \mathbf{v})^\mathrm{thr}$. Note that the latter: (i) must be negative, and (ii) is the only dimensional parameter. Its value, if used, must be set in the input velocity / length units.
 
 ```
-Max. reach around halos (cMpc), excluded cells in boundaries --------->
-4.0,1
+Use particle's MACH field (0=no, 1=yes), Mach threshold -------------->
+1,2.0
 ```
-- The first parameter is the maximum expected size for an object (or an upper limit to it).
-- The second parameter is the number of cells to exclude from the boundary of a patch to look for density peaks. Set it, at least, to 1, in order to be able to compute central differences.
-
-```
-Minimum fraction of shared volume to merge (in grid search) ---------->
-0.6
-```
-- Haloes overlapping a fraction of the volume of the smallest larger than this are no longer considered within the process of (non-substructure) halo finding.
-
-```
-FLAG_WDM (=1 write DM particles, =0 no) ------------------------------>
-1
-```
-- Whether to write the DM (and stellar, if any) lists of particles belonging to each halo.
-
-```
-Search for substructure (=1 yes, =0 no) ------------------------------>
-0
-```
-- Whether to run the substructure search.
-
-```
-Compute energies (=1 yes, =0 no), max num of part. for direct sum ---->
-0,4000
-```
-- The first parameter controls whether to run the gravitational energy computation.
-- The second parameter establishes the maximum number of particles so that the gravitational binding energy is computed by direct summation. For haloes with more particles, a sampling estimate is used instead.
-
-```
-Minimum number of particles per halo --------------------------------->
-25
-```
-- Haloes with less than this number of particles are regarded as 'poor' haloes and discarded.
-
-### Stellar halo finding parameters block
-These parameters control the stellar halo finding process. All can be ignored if the first one (whether to look for stellar haloes) is set to 0.
-
-```
-Look for stellar haloes (=1 yes, =0 no) ------------------------------>
-0
-```
-- Whether to look for stellar haloes.
-
-```
-Minimum number of stellar particles per stellar halo ----------------->
-25
-```
-- Stellar haloes with less than this number of stellar particles within the stellar half-mass radius are regarded as 'poor' stellar haloes and discarded.
-
-```
-Cut stellar halo if density increases more than factor from min ------>
-5.0
-```
-- Consider a maximum radius for the stellar halo if density increases by a factor larger than this from the minimum value of the density inside that radius.
-
-```
-Cut stellar halo if radial distance of consecutive stars > (ckpc) ---->
-10.0
-```
-- Consider a maximum radius for the stellar halo if there is a gap in radial space without any stellar particle larger than this comoving length.
-
-```
-Cut stellar halo if rho_* falls below this factor of rho_B ----------->
-1.0
-```
-- Consider a maximum radius for the stellar halo if the density of the stars falls below this factor of the density of the background.
-```
-Cut stellar halo at a maximum (>0, physical; <0, comoving) radius of
- (kpc) --------------------------------------------------------------->
- 200.0
-```
-- Consider a maximum radius for the stellar halo. This might be useful to identify BCGs and separate them from the rest of the ICL. If positive, it is interpreted as a physical radius (in kpc). If negative, it is interpreted as a comoving radius (in ckpc).
+- Alternatively, if there is Mach number information available (first parameter set to 1), strong shocked cells are flagged as those with Mach number above a certain threshold, $\mathcal{M} > \mathcal{M}^\mathrm{thr}$, set by the second parameter.
