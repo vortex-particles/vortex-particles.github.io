@@ -123,16 +123,23 @@ SOR presion parameter, SOR max iter, border for AMR patches ---------->
 These parameters control the multifiltering process, which is used to adaptively extract the turbulent contribution to the velocity field.
 
 ```
-Multiscale filter: apply filter -------------------------------------->
+Apply filter (1: multiscale filter; 2: fix-scale filter) ------------->
 1
 ```
+- Use 0 for no filtering (work with the total velocity field), 1 for the multiscale filter, and 2 for filtering with a fixed length scale (to be specified below).
 - Keep in mind that running the filter requires the `FILTER=1` flag in the [compilation process](get_vortexp#compilation). If, after compiling, you do not want to use the filter, you can set this parameter to 0 without the need of recompiling the code. 
 
 ```
 Filtering parameters: tolerance, growing step, max. num. of its. ----->
 0.1,1.05,200
 ```
-- The filtering length is increased until the relative variation of the turbulent velocity fields falls below the tolerance set by the first parameter. Each iteration of the filter algorithm increases the filtering length by the factor set by the second parameter. The third parameter is the maximum number of iterations allowed, to avoid pathologic cases where the filter does not converge.
+- In the multiscale filter only: the filtering length is increased until the relative variation of the turbulent velocity fields falls below the tolerance set by the first parameter. Each iteration of the filter algorithm increases the filtering length by the factor set by the second parameter. The third parameter is the maximum number of iterations allowed, to avoid pathologic cases where the filter does not converge.
+
+```
+Maximum (for multiscale) or fix filt. length (input length units) ---->
+1000.0
+``` 
+- If apply filter is 1, this sets the maximum filtering length for the multiscale filter (if you don't want to impose a maximum filtering length, just set this to a value larger than your domain size). If apply filter is 2, this sets the fixed filtering length.
 
 ### On-the-fly shock detection (for multifiltering)
 The last block of parameters refers to the flagging of strong shocks, which is used as an additional stopping condition for the iterations of the multiscale filter. This is only used if the multiscale filter is applied.
