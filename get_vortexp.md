@@ -146,13 +146,17 @@ The only mandatory option is:
 
 Several important optional options (which are not mandatory; check the default values with `make info`) are:
 
-- `FFTW`: if you want to use FFTW, set `FFTW=1`; else`FFTW=0`.
-- `FILTER`: if you want to use the multi-scale filter, set `FILTER=1`; else `FILTER=0`.
-- `WEIGHT`: the weighting scheme: particle-number-weighted (0), mass-weighted (1), or volume-weighted (2).
-- `KERNEL`: the kernel family (0: cubic spline; 1: Wendland C4; 2: Wendland C6).
-- `OUTPUT_GRID`: if you want to output any gridded results and/or inputs, set `OUTPUT_GRID=1`; else `OUTPUT_GRID=0`.
-- `OUTPUT_PARTICLES`: if you want to output any particle results, set `OUTPUT_PARTICLES=1`; else `OUTPUT_PARTICLES=0`.
-- `OUTPUT_FILTER`: if you want to output any information about the filter (turbulent total velocities prior to the HHD, filtering lengths, etc.), set `OUTPUT_FILTER=1`; else `OUTPUT_FILTER=0`.
+- `READER`: used to toggle between the different included readers. Available options (default is the first one) are:
+    - `READER=0`: Gadget unformatted snapshot reader (default).
+    - `READER=1`: Arepo HDF5 snapshot reader. 
+- `FFTW`: if you want to use FFTW, set `FFTW=1` (default); else`FFTW=0`.
+- `FILTER`: if you want to use the multi-scale filter, set `FILTER=1`; else `FILTER=0` (default).
+- `WEIGHT`: the weighting scheme: particle-number-weighted (0; default), mass-weighted (1), or volume-weighted (2).
+- `KERNEL`: the kernel family (0: cubic spline, M4, default; 1: Wendland C4; 2: Wendland C6; 3: quartic spline, M5; 4: quintic spline, M6).
+- `WEIGHT_FILTER`: by default bulk velocities are volume-weighted. If you se this to `WEIGHT_FILTER=1`, the bulk velocities will be mass-weighted. This is only relevant if you are using the filter.
+- `OUTPUT_GRID`: if you want to output any gridded results and/or inputs, set `OUTPUT_GRID=1` (default); else `OUTPUT_GRID=0`.
+- `OUTPUT_PARTICLES`: if you want to output any particle results, set `OUTPUT_PARTICLES=1` (default); else `OUTPUT_PARTICLES=0`.
+- `OUTPUT_FILTER`: if you want to output any information about the filter (turbulent total velocities prior to the HHD, filtering lengths, etc.), set `OUTPUT_FILTER=1` (default); else `OUTPUT_FILTER=0`.
 
 The behaviour of vortex-p with respect to the outputs and the filtering scheme can be further tuned at runtime by modifying the `vortex.dat` file. See [the parameters file page](set_parameters.md) for more information. Therefore, if you have compiled the code with `FILTER=1`, you can still choose to not use the filter at runtime (but not the other way around). The same applies to the `OUTPUT_GRID`, `OUTPUT_PARTICLES` and `OUTPUT_FILTER` options. This is mainly done to generate a more efficient executable.
 
@@ -165,9 +169,9 @@ For running vortex-p, you may want to use a shell script containing all the nece
 #!/bin/bash
 
 ulimit -s 128000000
-ulimit -v 500000000
+ulimit -v 500000000 # very large, even unlimited if your system configuration allows! (this is not real memory)
 ulimit -c 0
-export OMP_NUM_THREADS=24
+export OMP_NUM_THREADS=24 # Number of threads to use.
 export OMP_STACKSIZE=4000m
 export OMP_PROC_BIND=true
 
