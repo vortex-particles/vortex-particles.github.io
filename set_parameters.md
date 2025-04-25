@@ -86,10 +86,12 @@ Number of particles for a cell to be refinable ----------------------->
 - A cell will be flagged as refinable if it hosts more (or equal) particles than this threshold. This parameter is crucial to control the number of patches (and, thus, to keep memory usage and CPU time contained). If you think that the code is creating too many patches, you may want to increase this parameter. If you think that the code is underresolving important regions, you may want to decrease it.
 
 ```
-Minimum size of a refinement patch to be accepted -------------------->
-6
+Minimum size of a refinement patch to be accepted (<0: octree-like)--->
+-6
 ```
-- Not all refinable cells get finally refined, but only if they are going to be covered by a patch whose minimum extent (measured in number of fine, i.e. refined, cells) is at least this number. The lower the value, the more aggressive the refinement. However, it will importantly increase the computational cost. A reasonable value is around 6-8, although in test runs it may be advisable to start with a larger number (i.e., 20) to decrease the computing time.
+- If this parameter is negative (default), the refinement will be octree-like, meaning that given blocks of the domain (of size NAMRX, defined in the [compilation parameters](get_vortexp#compilation-time-parameters) section) will be flagged for refinement if they contain enough refinable cells. This is the default behaviour, and it is recommended for most cases.
+
+- If the parameter is positive, the refinement is more dynamic, and refinement regions can overlap to ensure an adequate coverage of the largest amount of refinable cells. Not all refinable cells get finally refined, but only if they are going to be covered by a patch whose minimum extent (measured in number of fine, i.e. refined, cells) is at least this number. The lower the value, the more aggressive the refinement. However, it will importantly increase the computational cost. A reasonable value is around 6-8, although in test runs it may be advisable to start with a larger number (i.e., 20) to decrease the computing time.
 
 ```
 Cells not to be refined from the border (base grid) ------------------>
@@ -107,6 +109,8 @@ Number of neighbours for interpolation ------------------------------->
 - The number of neighbours to consider, around each cell centre, for the interpolation of the velocity field. This number should be large enough to ensure that the kernel function is well sampled, but not too large to avoid excessive computational cost.
 
 > Note: in an SPH simulation, a reasonable rule of thumb is to set the kernel function and the number of neighbours to be the same as used when evolving the simulation, since this is the most physically-motivated definition of the underlying velocity field.
+
+> Note: in a moving-mesh simulation, smaller values can be used. Reasonable numbers could be around 16.
 
 ### Poisson solver block 
 
@@ -140,6 +144,12 @@ Maximum (for multiscale) or fix filt. length (input length units) ---->
 1000.0
 ``` 
 - If apply filter is 1, this sets the maximum filtering length for the multiscale filter (if you don't want to impose a maximum filtering length, just set this to a value larger than your domain size). If apply filter is 2, this sets the fixed filtering length.
+
+```
+Smooth filtering length before applying the filter (0=no, 1=yes) ----->
+1
+```
+- If you are using the filter in option 1 (multiscale), this parameter sets whether to smooth the filtering length (which can have large cell-to-cell variations due to the convergence of the algorithm) before determining the filtering length. This is advised, and the default value of the parameter is thus 1 (apply the smoothing). If you set it to 0, the filtering length will be used as computed by the algorithm.
 
 ### On-the-fly shock detection (for multifiltering)
 The last block of parameters refers to the flagging of strong shocks, which is used as an additional stopping condition for the iterations of the multiscale filter. This is only used if the multiscale filter is applied.
