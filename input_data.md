@@ -29,6 +29,12 @@ If the multiscale filter is to be used, then one of the two following variables 
 
 Additionally, if the velocity field is to be volume-weighted, the density of the gas particles must be read.
 
+### The Arepo hdf5 reader
+
+Also included in vortex-p is a reader for Arepo hdf5 output files. This reader is activated at [compilation time](get_vortexp#compilation) with the option `READER=1` in the make command. It is located in the same `reader.f` file.
+
+> NOTE: both the Arepo and the GADGET readers should be relatively plug-and-play. But, since data formats can change depending on the version and flavour of the code, be sure to check the format of your input data files for possible variations.
+
 ### Creating your custom reader subroutine
 
 You can alter the reader format by creating a couple of custom subroutines in the `reader.f` source file, or directly modifying the `READ_GADGET_UNFORMATTED_NPART` and `READ_GADGET_UNFORMATTED` subroutines. If creating your own subroutines, you can use the ones for GADGET-unformatted as a template, and do not forget to set the correct calls to the new functions inside the `READ_PARTICLES` subroutine.
