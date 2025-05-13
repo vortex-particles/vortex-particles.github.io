@@ -7,7 +7,7 @@ last_modified_at: 2024-03-12T10:39:00
 
 ## What is vortex-p?
 
-vortex-p is a tool for the analysis of the velocity fields of astrophysical simulations of different nature (SPH, moving-mesh, meshless, etc.), usually spanning many orders of magnitude in scales involved. In particular, vortex-p is capable of performing:
+<b>vortex-p</b> is a tool for the analysis of the velocity fields of astrophysical simulations of different nature (SPH, moving-mesh, meshless, etc.; but also grid-based AMR), usually spanning many orders of magnitude in scales involved. In particular, vortex-p is capable of performing:
 
 - A Helmholtz-Hodge decomposition (HHD; i.e., the decomposition of the velocity field into a solenoidal and an irrotational/compressive part). While typical algorithms for this aim rely on uniform grids, severely limiting the dynamical range that can be covered, vortex-p internally uses an AMR representation of the velocity field and can, in principle, capture the full dynamical range of the simulation.
 - A Reynolds decomposition (i.e., the decomposition of the velocity field into a bulk and a turbulent part). This is achieved by means of a multi-scale filtering of the velocity field, where the filtering scale around each point is determined by the local flow properties.
