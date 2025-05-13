@@ -47,11 +47,11 @@ You can alter the reader format by creating a couple of custom subroutines in th
 
 If you want to add a reader for a different *grid-based* code, then adapt the `READ_GRID` subroutine instead (which is present when the `make` command has `INPUT_IS_GRID=1`; this is default when `READER=2`). 
 
+<b>Do not hesitate to [contact us](mailto:david.valles-perez@uv.es)</b> if you need help to add a reader for a different code, or if you have any questions about the reader subroutines.
+
 #### Note regarding the grid-based input
 
 The grid-based input is recommended for patch-based AMR codes (e.g., MASCLET, ENZO, FLASH, etc.). For octree-based AMR code, it is rather recommended to use the particle-based input, e.g., pass each (not-refined) cell as a particle.
-
-Do not hesitate to [contact us](mailto:david.valles-perez@uv.es) if you need help to add a reader for a different code, or if you have any questions about the reader subroutines.
 
 #### Contributing
 
