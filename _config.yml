@@ -1,6 +1,6 @@
 remote_theme: just-the-docs/just-the-docs
 title: vortex-p Documentation
-description: vortex-p (Vallés-Pérez, Planelles & Quilis, 2021a,b; Vallés-Pérez et al., in prep.). Multi-resolution Helmholtz and Reynolds decomposition of particle-based data.
+description: vortex-p (Vallés-Pérez, Planelles & Quilis, 2021a,b; Vallés-Pérez et al., 2024). Multi-resolution Helmholtz and Reynolds decomposition of particle-based data.
 aux_links:
   "vortex-p on GitHub":
     - "//github.com/dvallesp/vortex-p"
