@@ -4,6 +4,7 @@ title: Setting the parameters
 nav_order: 4
 has_children: true
 last_modified_at: 2024-03-13T09:23:11
+permalink: /set_parameters/
 ---
 
 ## Setting the parameters of vortex-p
