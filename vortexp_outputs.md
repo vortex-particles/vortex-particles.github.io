@@ -40,3 +40,7 @@ In order to handle easily these outputs, we provide a python library (`./python_
 Further computations with the AMR-gridded data, such as the generation of uniform grids from the AMR data to make slices and projections, can be easily performed with the [masclet_framework library](https://github.com/dvallesp/masclet_framework). Note that this library requires some additional (rather standard) dependencies (numpy, scipy, matplotlib, astropy, etc.), which can be installed via pip or your preferred package manager.
 
 An example Jupyter notebook showing how to use the python readers and the masclet_framework library (which you will need to clone separately) is provided in the same `./python_reader` directory.
+
+### Julia reader 
+
+If you use Julia for analysis purposes, you can use the [VortexHelper.jl](https://github.com/fgroth/VortexHelper.jl) package, developed by [F. Groth](https://github.com/fgroth). This package contains Julia readers for the vortex-p outputs, as well as some wrappers for running vortex-p that create all the necessary parameter files.
