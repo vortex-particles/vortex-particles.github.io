@@ -45,6 +45,12 @@ vortex-p allows you to read directly a patch-based hierarchy of AMR grids, as th
 
 Although it is not the primary use of vortex-p, it is possible to read a fixed Eulerian grid. This is activated at [compilation time](get_vortexp#compilation) with the option `READER=3` in the make command. It is located in `readers/fixgrid_hdf5.f`. 
 
+In this case, the code is expected a simple hdf5 file named `simulation/snapXXX.hdf5`, where `XXX` is the snapshot number. The file should contain the following datasets in the root group. Each of these should be a 3D array of the same size, with the following names:
+
+- `vx`, `vy`, `vz`: the x, y and z components of the velocity field.
+- `mach`: the shock Mach number, if `FILTER=1`.
+- `density`: the density field, if `FILTER=1` and `WEIGHT_FILTER=1` (mass-weighted bulk velocities).
+
 ### Creating your custom reader subroutine
 
 You can alter the reader format by creating a couple of custom subroutines in the `readers/` folder, and correctly calling them in the `read_particles()` function within the `readers.f` source file. Or directly modifying the `READ_GADGET_UNFORMATTED_NPART` and `READ_GADGET_UNFORMATTED` subroutines in `readers/gadget_unformatted.f` for *particle-based code outputs*. If creating your own subroutines, you can use the ones for GADGET-unformatted as a template (or the Arepo ones if using hdf5), and do not forget to set the correct calls to the new functions inside the `READ_PARTICLES` subroutine.
