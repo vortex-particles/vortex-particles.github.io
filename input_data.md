@@ -16,7 +16,7 @@ In this section, we describe the different ways of loading your particle data in
 
 The prototype reader included in vortex-p is the one for GADGET-2 and GADGET-3 unformatted binary files. 
 
-This reader is located in the `reader.f` file, and is split in two functions: `READ_GADGET_UNFORMATTED_NPART` and `READ_GADGET_UNFORMATTED`, both of them called within a subroutine called `READ_PARTICLES`. The two former subroutines depend on a module, called `GADGET_READ`, which is also included in the code (file `reader_gadget.f`) and contains the necessary structures and variables to read these GADGET files.
+This reader is located in the `readers/gadget_unformatted.f` file, and is split in two functions: `READ_GADGET_UNFORMATTED_NPART` and `READ_GADGET_UNFORMATTED`, both of them called within a subroutine called `READ_PARTICLES`. The two former subroutines depend on a module, called `GADGET_READ`, which is also included in the code (file `reader_gadget.f`) and contains the necessary structures and variables to read these GADGET files.
 
 In particular, the data that needs to be read for a given snapshot is: 
 
@@ -34,18 +34,22 @@ Additionally, if the velocity field is to be volume-weighted, the density of the
 
 ### The Arepo hdf5 reader (`READER=1`)
 
-Also included in vortex-p is a reader for Arepo hdf5 output files. This reader is activated at [compilation time](get_vortexp#compilation) with the option `READER=1` in the make command. It is located in the same `reader.f` file.
+Also included in vortex-p is a reader for Arepo hdf5 output files. This reader is activated at [compilation time](get_vortexp#compilation) with the option `READER=1` in the make command. It is located in `readers/arepo_hdf5.f`.
 
 
 ### The MASCLET grid reader (`READER=2`)
 
-vortex-p allows you to read directly a patch-based hierarchy of AMR grids, as the one used in the MASCLET code. This reader is activated at [compilation time](get_vortexp#compilation) with the option `READER=2` in the make command. It is located in the same `reader.f` file.
+vortex-p allows you to read directly a patch-based hierarchy of AMR grids, as the one used in the MASCLET code. This reader is activated at [compilation time](get_vortexp#compilation) with the option `READER=2` in the make command. It is located in `reareaders/masclet.f`.
+
+### The fix-grid hdf5 reader (`READER=3`)
+
+Although it is not the primary use of vortex-p, it is possible to read a fixed Eulerian grid. This is activated at [compilation time](get_vortexp#compilation) with the option `READER=3` in the make command. It is located in `readers/fixgrid_hdf5.f`. 
 
 ### Creating your custom reader subroutine
 
-You can alter the reader format by creating a couple of custom subroutines in the `reader.f` source file, or directly modifying the `READ_GADGET_UNFORMATTED_NPART` and `READ_GADGET_UNFORMATTED` subroutines for *particle-based code outputs*. If creating your own subroutines, you can use the ones for GADGET-unformatted as a template, and do not forget to set the correct calls to the new functions inside the `READ_PARTICLES` subroutine.
+You can alter the reader format by creating a couple of custom subroutines in the `readers/` folder, and correctly calling them in the `read_particles()` function within the `readers.f` source file. Or directly modifying the `READ_GADGET_UNFORMATTED_NPART` and `READ_GADGET_UNFORMATTED` subroutines in `readers/gadget_unformatted.f` for *particle-based code outputs*. If creating your own subroutines, you can use the ones for GADGET-unformatted as a template (or the Arepo ones if using hdf5), and do not forget to set the correct calls to the new functions inside the `READ_PARTICLES` subroutine.
 
-If you want to add a reader for a different *grid-based* code, then adapt the `READ_GRID` subroutine instead (which is present when the `make` command has `INPUT_IS_GRID=1`; this is default when `READER=2`). 
+If you want to add a reader for a different *grid-based* code, then adapt the `READ_GRID` subroutine instead (which is present when the `make` command has `INPUT_IS_GRID=1`; this is default when `READER=2` or `READER=3`). 
 
 <b>Do not hesitate to [contact us](mailto:david.valles-perez@uv.es)</b> if you need help to add a reader for a different code, or if you have any questions about the reader subroutines.
 

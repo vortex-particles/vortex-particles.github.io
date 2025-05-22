@@ -150,6 +150,7 @@ Several important optional options (which are not mandatory; check the default v
     - `READER=0`: Gadget unformatted snapshot reader (default).
     - `READER=1`: Arepo HDF5 snapshot reader. 
     - `READER=2`: MASCLET (grid) reader.
+    - `READER=3`: fixed grid reader (HDF5).
 - `FFTW`: if you want to use FFTW, set `FFTW=1` (default); else`FFTW=0`.
 - `FILTER`: if you want to use the multi-scale filter, set `FILTER=1`; else `FILTER=0` (default).
 - `WEIGHT`: the weighting scheme: particle-number-weighted (0; default), mass-weighted (1), or volume-weighted (2).
